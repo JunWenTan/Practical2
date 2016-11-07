@@ -6,44 +6,56 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.io.PrintWriter;
+import java.util.List;
 
 /**
- * Created by 153907N on 10/24/2016.
+ * Created by chitboon on 10/29/15.
  */
-@WebServlet(name = "BookCatalogServlet", urlPatterns = "/bookcatalog")
+@WebServlet(name = "BookCatalogServlet", urlPatterns="/bookcatalog")
+
 public class BookCatalogServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        ArrayList<BookDetails> bdList = new ArrayList<BookDetails>();
-        BookDBAO bdao = new BookDBAO();
         PrintWriter out = response.getWriter();
-        bdList = bdao.getAllBooks();
+        try {
+            BookDBAO db = new BookDBAO();
+            List<BookDetails> list = db.getAllBook();
+            out.println("<html>" + "<head><title>Duke's Bookstore</title></head>" +
+                    "<body  bgcolor=\"#ffffff\">" + "<center>" +
+                    "<hr> <br> &nbsp;" + "<h1>" +
+                    "<font size=\"+3\" color=\"#CC0066\">Duke's </font> <img src=\"" +
+                    "./duke.books.gif\" alt=\"Duke holding books\"\">" +
+                    "<font size=\"+3\" color=\"black\">Bookstore</font>" + "</h1>" +
+                    "</center>" + "<br> &nbsp; <hr> <br> ");
 
-        for(BookDetails a: bdList)
-        {
-            BookDetails bd = a;
+            out.println("<br> &nbsp;" + "<h3>Please Choose from our selection" +
+                    "</h3>" + "<center> <table summary=\"layout\">");
 
-            //Print out the information obtained
-            out.println("<h2>" + bd.getTitle() + "</h2>" + "&nbsp;" +
-                    " by<em>" + bd.getFirstName() +
-                    " " + bd.getSurname() + "</em> &nbsp; &nbsp; " + "(" +
-                    bd.getYear() + ")<br> &nbsp; <br>" + "<h4>" +
-                    "Here's what the critcs say: </h4><blockquote>" +
-                    bd.getDescription() + "</blockquote>" + "<h4>" +
-                    "Our Price: " + bd.getPrice() + "</h4>" +
-                    "<p><strong><a href=\"" +
-                    response.encodeURL(request.getContextPath() +
-                            "/bookcatalog?bookId=" + a.getBookId()) + "\">" +
-                    "Add to Cart</a>&nbsp;&nbsp;&nbsp;" +
-                    "<a href=\"" +
-                    response.encodeURL(request.getContextPath() +
-                            "/bookcatalog") + "\">" +
-                    "Continue Shopping</a></p></strong>");
+            for (BookDetails book : list) {
+                String bookId = book.getBookId();
+                out.println("<tr>" + "<td bgcolor=\"#ffffaa\">" + "<a href=\"" +
+                        response.encodeURL(request.getContextPath() +
+                                "/bookdetails?bookId=" + bookId) + "\"> <strong>" +
+                        book.getTitle() + "&nbsp; </strong></a></td>" +
+                        "<td bgcolor=\"#ffffaa\" rowspan=2>" + book.getPrice() +
+                        "&nbsp; </td>" + "<td bgcolor=\"#ffffaa\" rowspan=2>" +
+                        "<a href=\"" +
+                        response.encodeURL(request.getContextPath() +
+                                "/bookcatalog?bookId=" + bookId) + "\"> &nbsp;" +
+                        "Add to Cart&nbsp;</a></td></tr>" +
+                        "<tr>" + "<td bgcolor=\"#ffffff\">" + "&nbsp; &nbsp;" +
+                        "by<em> " + book.getFirstName() +
+                        " " + book.getSurname() + "</em></td></tr>");
+            }
+
+            out.println("</table></center></body></html>");
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new ServletException(e);
         }
     }
 }
